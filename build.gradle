@@ -14,6 +14,10 @@ java {
 	}
 }
 
+ext {
+	set('springCloudVersion', "2024.0.0")
+}
+
 repositories {
 	mavenCentral()
 }

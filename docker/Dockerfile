@@ -1,0 +1,20 @@
+# Use a base image with Java runtime
+FROM eclipse-temurin:21.0.4_7-jre-alpine
+ 
+# Create a directory for the app
+WORKDIR /app
+ 
+# Add the application's jar to the container
+RUN pwd && ls -al
+ 
+# Copy the JAR file into the container
+COPY ./*.jar /app/copilot-agent-demo-user.jar
+ 
+# updates dates on the application (important for caching)
+RUN sh -c 'touch ./.jar'
+ 
+# provide a hook into the webapp
+EXPOSE 8080
+ 
+# run the application
+ENTRYPOINT ["java", "-jar", "copilot-agent-demo-user.jar"]

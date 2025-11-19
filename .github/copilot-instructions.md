@@ -100,6 +100,7 @@ Open a PR from `sync-docker-gradle` to `main`:
     - Dockerfile and related configurations added/updated
     - build.gradle and settings.gradle aligned with reference standards
     - Gradle wrapper and scripts synced
+    - Add Copilot, vartikadhawan16 and vipulmahajan1988 as Reviewer
 
 Using GitHub CLI:
 

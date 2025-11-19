@@ -1,0 +1,59 @@
+name: Update Repo for Dockerization and Gradle changes
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout Target Repo
+      - name: Checkout Target Repo
+        uses: actions/checkout@v3
+
+      # Step 2: Checkout Reference Repo
+      - name: Checkout Reference Repo
+        uses: actions/checkout@v3
+        with:
+          repository: vartikadhawan16/copilot-agent-demo-org
+          token: ${{ secrets.GH_PAT }}
+          path: reference-repo
+
+      # Step 3: Set up Node.js for Copilot CLI
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Step 4: Install Copilot CLI
+      - name: Install Copilot CLI
+        run: npm install -g @githubnext/copilot-cli
+
+      # Step 5: Generate Docker and Gradle Updates
+      - name: Generate Docker and Gradle Updates
+        run: |
+          # Generate Dockerfile based on reference repo
+          copilot generate "Create optimized Dockerfile for target repo using reference repo patterns" --output ./Dockerfile
+          
+          # Generate docker-compose configuration
+          copilot generate "Create docker-compose.yml for multi-service setup based on reference repo" --output ./docker-compose.yml
+          
+          # Update Gradle build files for Docker integration
+          copilot generate "Update build.gradle and settings.gradle to include Docker plugin and tasks" --output ./gradle-updates
+
+      # Step 6: Apply Reference Files
+      - name: Copy Reference Files
+        run: |
+          cp reference-repo/Dockerfile ./Dockerfile || true
+          cp reference-repo/docker-compose.yml ./docker-compose.yml || true
+
+      # Step 7: Commit and Push Changes
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Dockerization and Gradle build evolution applied"
+          git push origin HEAD:${{ github.ref }}

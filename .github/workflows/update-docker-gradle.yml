@@ -1,11 +1,11 @@
-name: Dockerization and Gradle Build Evolution
+name: Sync Docker and Gradle Configurations
 
 on:
   issues:
     types: [opened]
 
 jobs:
-  update-repo:
+  sync-config:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,17 +21,7 @@ jobs:
           token: ${{ secrets.GH_PAT }}
           path: reference-repo
 
-      # Step 3: Set up Node.js for Copilot CLI
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      # Step 4: Install Copilot CLI
-      - name: Install Copilot CLI
-        run: npm install -g @githubnext/copilot-cli
-
-      # Step 5: Copy Docker and Gradle Files from Reference Repo
+      # Step 3: Copy Docker and Gradle Files from Reference Repo
       - name: Copy Docker and Gradle Files
         run: |
           mkdir -p docker
@@ -42,45 +32,27 @@ jobs:
           cp reference-repo/gradlew ./gradlew || true
           cp reference-repo/gradlew.bat ./gradlew.bat || true
 
-      # Step 6: Enhance Docker and Gradle Configurations using Copilot
-      - name: Enhance Docker and Gradle Configurations
-        run: |
-          copilot generate "Optimize Dockerfile for multi-stage build and GKE compatibility" --output ./docker/Dockerfile
-          copilot generate "Update build.gradle to include Docker plugin and link tasks for image build" --output ./build.gradle
-
-      # Step 7: Validate Gradle Build
-      - name: Validate Gradle Build
-        run: |
-          chmod +x gradlew
-          ./gradlew build --stacktrace
-
-      # Step 8: Lint Dockerfile
-      - name: Lint Dockerfile
-        run: |
-          docker run --rm -i hadolint/hadolint < ./docker/Dockerfile
-
-      # Step 9: Create Branch and Commit Changes
+      # Step 4: Create Branch and Commit Changes
       - name: Commit Changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git checkout -b docker-gradle-update
+          git checkout -b sync-docker-gradle
           git add .
-          git commit -m "Dockerization and Gradle build evolution applied"
+          git commit -m "Synced Docker and Gradle configurations from reference repo"
 
-      # Step 10: Push Branch and Create Pull Request
+      # Step 5: Push Branch and Create Pull Request
       - name: Push Branch
-        run: git push origin docker-gradle-update
+        run: git push origin sync-docker-gradle
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_PAT }}
-          title: "Dockerization & Gradle Build Evolution"
+          title: "Sync Docker and Gradle Configurations"
           body: |
             Automated update based on reference repo:
-            - Dockerfile and docker-compose added
-            - Gradle build files updated for Docker integration
-            - GKE compatibility enhancements applied
+            - Dockerfile and related configurations added/updated
+            - build.gradle and settings.gradle aligned with reference standards
+            - Gradle wrapper and scripts synced
           base: main
-          head: docker-gradle-update

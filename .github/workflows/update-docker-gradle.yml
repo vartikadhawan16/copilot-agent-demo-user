@@ -1,4 +1,4 @@
-name: Update Repo for Dockerization and Gradle Evolution
+name: Dockerization and Gradle Build Evolution
 
 on:
   issues:
@@ -42,17 +42,45 @@ jobs:
           cp reference-repo/gradlew ./gradlew || true
           cp reference-repo/gradlew.bat ./gradlew.bat || true
 
-      # Step 6: Enhance Files Using Copilot
+      # Step 6: Enhance Docker and Gradle Configurations using Copilot
       - name: Enhance Docker and Gradle Configurations
         run: |
-          copilot generate "Optimize Dockerfile for multi-stage build and GKE compatibility and keep name of Applicatin as current repo" --output ./docker/Dockerfile
+          copilot generate "Optimize Dockerfile for multi-stage build and GKE compatibility" --output ./docker/Dockerfile
           copilot generate "Update build.gradle to include Docker plugin and link tasks for image build" --output ./build.gradle
 
-      # Step 7: Commit and Push Changes
-      - name: Commit and Push Changes
+      # Step 7: Validate Gradle Build
+      - name: Validate Gradle Build
+        run: |
+          chmod +x gradlew
+          ./gradlew build --stacktrace
+
+      # Step 8: Lint Dockerfile
+      - name: Lint Dockerfile
+        run: |
+          docker run --rm -i hadolint/hadolint < ./docker/Dockerfile
+
+      # Step 9: Create Branch and Commit Changes
+      - name: Commit Changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+          git checkout -b docker-gradle-update
           git add .
-          git commit -m "Applied Dockerization and Gradle build changes from reference repo"
-          git push origin HEAD:${{ github.ref }}
+          git commit -m "Dockerization and Gradle build evolution applied"
+
+      # Step 10: Push Branch and Create Pull Request
+      - name: Push Branch
+        run: git push origin docker-gradle-update
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_PAT }}
+          title: "Dockerization & Gradle Build Evolution"
+          body: |
+            Automated update based on reference repo:
+            - Dockerfile and docker-compose added
+            - Gradle build files updated for Docker integration
+            - GKE compatibility enhancements applied
+          base: main
+          head: docker-gradle-update

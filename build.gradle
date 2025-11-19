@@ -50,7 +50,7 @@ task createDockerfile(type: Dockerfile) {
 	destFile = file('build/docker/Dockerfile')
 	from('eclipse-temurin:21.0.4_7-jre-alpine')
 	workingDir('/app')
-	copyFile(jar.archiveFileName.get(), '/app/app.jar')
+	copyFile(bootJar.archiveFileName.get(), '/app/app.jar')
 	exposePort(8080)
 	entryPoint('java', '-jar', 'app.jar')
 }

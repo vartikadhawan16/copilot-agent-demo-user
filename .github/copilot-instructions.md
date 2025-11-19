@@ -44,10 +44,6 @@ Copy the following files from the reference repo:
 ```bash
 cp reference-repo/docker/Dockerfile ./docker/Dockerfile || true
 cp reference-repo/build.gradle ./build.gradle || true
-cp reference-repo/settings.gradle ./settings.gradle || true
-cp -r reference-repo/gradle ./gradle || true
-cp reference-repo/gradlew ./gradlew || true
-cp reference-repo/gradlew.bat ./gradlew.bat || true
 ```
 
 Optional: If `docker-compose.yml` or `.env` files exist in the reference repo, copy them too:
@@ -100,7 +96,6 @@ Open a PR from `sync-docker-gradle` to `main`:
     - Dockerfile and related configurations added/updated
     - build.gradle and settings.gradle aligned with reference standards
     - Gradle wrapper and scripts synced
-    - Add Copilot, vartikadhawan16 and vipulmahajan1988 as Reviewer
 
 Using GitHub CLI:
 
@@ -121,6 +116,7 @@ gh pr create --title "Sync Docker and Gradle Configurations" \
 *   Maintain original structure of copied files.
 *   Use PAT stored in `GH_PAT` for authentication.
 *   If issue mentions `docker-compose` or `.env`, copy those files as well.
+*   Add Copilot, vartikadhawan16 and vipulmahajan1988 as Reviewer in the PR.
 
 ```
 

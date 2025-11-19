@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.bmuschko.docker-remote-api' version '9.4.0'
 }
 
 group = 'com.copilot.agent'
@@ -20,7 +21,8 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'io.pivotal.spring.cloud:spring-cloud-services-starter-config-client'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -28,11 +30,60 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${springCloudServicesVersion}"
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Docker image configuration
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+
+// Create Dockerfile task
+task createDockerfile(type: Dockerfile) {
+	group = 'docker'
+	description = 'Creates a Dockerfile for the application'
+	destFile = file('build/docker/Dockerfile')
+	from('eclipse-temurin:21.0.4_7-jre-alpine')
+	workingDir('/app')
+	copyFile(jar.archiveFileName.get(), '/app/app.jar')
+	exposePort(8080)
+	entryPoint('java', '-jar', 'app.jar')
+}
+
+// Build Docker image task
+task buildDockerImage(type: DockerBuildImage) {
+	group = 'docker'
+	description = 'Builds a Docker image for the application'
+	dependsOn bootJar, createDockerfile
+	inputDir = file('build/docker')
+	images.add("${project.group}/${project.name}:${project.version}")
+	images.add("${project.group}/${project.name}:latest")
+	
+	doFirst {
+		copy {
+			from bootJar
+			into 'build/docker'
+		}
+	}
+}
+
+// Push Docker image task
+task pushDockerImage(type: DockerPushImage) {
+	group = 'docker'
+	description = 'Pushes the Docker image to a registry'
+	dependsOn buildDockerImage
+	images.add("${project.group}/${project.name}:${project.version}")
+	images.add("${project.group}/${project.name}:latest")
+}
+
+// Configure bootJar for layered jars (better caching)
+bootJar {
+	layered {
+		enabled = true
+	}
 }

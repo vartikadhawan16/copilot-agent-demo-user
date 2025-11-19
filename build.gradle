@@ -8,6 +8,10 @@ group = 'com.copilot.agent'
 version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Copilot Agent'
 
+ext {
+	set('springCloudVersion', "2024.0.0")
+}
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
@@ -20,7 +24,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'io.pivotal.spring.cloud:spring-cloud-services-starter-config-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -28,7 +32,6 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${springCloudServicesVersion}"
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
 }

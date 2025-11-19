@@ -1,4 +1,4 @@
-name: Update Repo for Dockerization and Gradle changes
+name: Update Repo for Dockerization and Gradle Evolution
 
 on:
   issues:
@@ -31,23 +31,22 @@ jobs:
       - name: Install Copilot CLI
         run: npm install -g @githubnext/copilot-cli
 
-      # Step 5: Generate Docker and Gradle Updates
-      - name: Generate Docker and Gradle Updates
+      # Step 5: Copy Docker and Gradle Files from Reference Repo
+      - name: Copy Docker and Gradle Files
         run: |
-          # Generate Dockerfile based on reference repo
-          copilot generate "Create optimized Dockerfile for target repo using reference repo patterns" --output ./Dockerfile
-          
-          # Generate docker-compose configuration
-          copilot generate "Create docker-compose.yml for multi-service setup based on reference repo" --output ./docker-compose.yml
-          
-          # Update Gradle build files for Docker integration
-          copilot generate "Update build.gradle and settings.gradle to include Docker plugin and tasks" --output ./gradle-updates
+          mkdir -p docker
+          cp reference-repo/docker/Dockerfile ./docker/Dockerfile || true
+          cp reference-repo/build.gradle ./build.gradle || true
+          cp reference-repo/settings.gradle ./settings.gradle || true
+          cp -r reference-repo/gradle ./gradle || true
+          cp reference-repo/gradlew ./gradlew || true
+          cp reference-repo/gradlew.bat ./gradlew.bat || true
 
-      # Step 6: Apply Reference Files
-      - name: Copy Reference Files
+      # Step 6: Enhance Files Using Copilot
+      - name: Enhance Docker and Gradle Configurations
         run: |
-          cp reference-repo/Dockerfile ./Dockerfile || true
-          cp reference-repo/docker-compose.yml ./docker-compose.yml || true
+          copilot generate "Optimize Dockerfile for multi-stage build and GKE compatibility and keep name of Applicatin as current repo" --output ./docker/Dockerfile
+          copilot generate "Update build.gradle to include Docker plugin and link tasks for image build" --output ./build.gradle
 
       # Step 7: Commit and Push Changes
       - name: Commit and Push Changes
@@ -55,5 +54,5 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Dockerization and Gradle build evolution applied"
+          git commit -m "Applied Dockerization and Gradle build changes from reference repo"
           git push origin HEAD:${{ github.ref }}
